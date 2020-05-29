@@ -1,87 +1,75 @@
 package com.chanchuan.myapplication;
 
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chanchuan.data.TestInfo;
 import com.chanchuan.frame.ApiConfig;
-import com.chanchuan.frame.BasePresenter;
-import com.chanchuan.frame.IBaseView;
+import com.chanchuan.frame.CommonPresenter;
+import com.chanchuan.frame.ICommonModel;
+import com.chanchuan.frame.ICommonView;
 import com.chanchuan.frame.LoadTypeConfig;
 import com.chanchuan.frame.ParamHashMap;
-import com.chanchuan.frame.TestModel;
+import com.chanchuan.myapplication.base.BaseMVPActivity;
+import com.chanchuan.myapplication.model.TestModel;
+import com.chanchuan.myapplication.adapter.TestAdapter;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnRefreshLoadMoreListener;
 
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements IBaseView {
+public class MainActivity extends BaseMVPActivity implements ICommonView {
 
     @BindView(R.id.recycler)
     RecyclerView recycler;
     @BindView(R.id.smart)
     SmartRefreshLayout smart;
     int pageId = 0;
-    private BasePresenter basePresenter;
+    private CommonPresenter basePresenter;
     private TestAdapter testAdapter;
+    private Map<String, Object> params;
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-
-        initView();
+    protected void setUpData() {
+        basePresenter.getData(ApiConfig.TEST_GET, LoadTypeConfig.NORMAL, params, pageId);
     }
 
-    private void initView() {
-        TestModel testModel = new TestModel();
-        basePresenter = new BasePresenter(this, testModel);
-        final Map<String, Object> params = new ParamHashMap()
+    @Override
+    protected void setUpView() {
+        params = new ParamHashMap()
                 .add("c", "api")
                 .add("a", "getList");
 
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-
-        smart.setOnRefreshLoadMoreListener(new OnRefreshLoadMoreListener() {
-            @Override
-            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                pageId++;
-                basePresenter.getData(ApiConfig.TEST_GET, LoadTypeConfig.MORE, params, pageId);
-            }
-
-            @Override
-            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+        TestModel testModel = new TestModel();
+        basePresenter = new CommonPresenter(this, testModel);
+        initRecyclerView(recycler, smart, mode -> {
+            if (mode == LoadTypeConfig.REFRESH) {
                 pageId = 0;
                 basePresenter.getData(ApiConfig.TEST_GET, LoadTypeConfig.REFRESH, params, pageId);
+            } else {
+                pageId++;
+                basePresenter.getData(ApiConfig.TEST_GET, LoadTypeConfig.MORE, params, pageId);
             }
         });
 
         testAdapter = new TestAdapter(this);
         recycler.setAdapter(testAdapter);
-        basePresenter.getData(ApiConfig.TEST_GET, LoadTypeConfig.NORMAL, params, pageId);
-
-
     }
-    
-
-    private static final String TAG = "MainActivity";
 
     @Override
-    public void onSuccess(int whichApi, int loadType, Object[] objects) {
+    protected int setLayoutId() {
+        return R.layout.activity_main;
+    }
+
+    @Override
+    protected ICommonModel setModel() {
+        return new TestModel();
+    }
+
+    @Override
+    protected void netSuccess(int whichApi, int loadType, Object[] objects) {
+
         switch (whichApi) {
             case ApiConfig.TEST_GET:
                 if (loadType == LoadTypeConfig.MORE) {
@@ -90,14 +78,12 @@ public class MainActivity extends AppCompatActivity implements IBaseView {
                 } else if (loadType == LoadTypeConfig.REFRESH) {
                     smart.finishRefresh();
                     testAdapter.refreshDatas(((TestInfo) objects[0]).datas);
-                }else {
+                } else {
                     testAdapter.setDatas(((TestInfo) objects[0]).datas);
                 }
+                break;
         }
     }
 
-    @Override
-    public void onFailed(int whichApi, Throwable throwable) {
-        Toast.makeText(this, throwable.getMessage() != null ? throwable.getMessage() : "网络请求错误", Toast.LENGTH_SHORT).show();
-    }
+
 }

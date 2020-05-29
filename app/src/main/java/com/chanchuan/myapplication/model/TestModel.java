@@ -1,9 +1,12 @@
-package com.chanchuan.frame;
+package com.chanchuan.myapplication.model;
+
+import com.chanchuan.frame.ApiService;
+import com.chanchuan.frame.ICommonModel;
+import com.chanchuan.frame.ICommonPresenter;
 
 import java.util.Map;
 
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -11,12 +14,13 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class TestModel implements IBaseModel {
+public class TestModel implements ICommonModel {
     @Override
-    public void getData(final IBasePresenter presenter, final int whichApi, final Object[] params) {
+    public void getData(final ICommonPresenter presenter, final int whichApi, final Object[] params) {
         final int loadType = (int) params[0];
         Map param = (Map) params[1];
         final int pageId = (int) params[2];
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://static.owspace.com/")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

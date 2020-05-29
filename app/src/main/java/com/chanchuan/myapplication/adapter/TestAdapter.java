@@ -1,4 +1,4 @@
-package com.chanchuan.myapplication;
+package com.chanchuan.myapplication.adapter;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.chanchuan.data.TestInfo;
+import com.chanchuan.myapplication.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.chanchuan.frame;
 
-public interface IBaseView<D> {
+public interface ICommonView<D> {
     /**
      * 成功回调
      *
