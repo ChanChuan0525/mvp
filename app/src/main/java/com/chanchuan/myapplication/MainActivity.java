@@ -75,6 +75,7 @@ public class MainActivity extends BaseMVPActivity implements ICommonView {
                 if (loadType == LoadTypeConfig.MORE) {
                     smart.finishLoadMore();
                     testAdapter.setDatas(((TestInfo) objects[0]).datas);
+
                 } else if (loadType == LoadTypeConfig.REFRESH) {
                     smart.finishRefresh();
                     testAdapter.refreshDatas(((TestInfo) objects[0]).datas);
@@ -84,6 +85,4 @@ public class MainActivity extends BaseMVPActivity implements ICommonView {
                 break;
         }
     }
-
-
 }
